@@ -99,6 +99,7 @@ if __name__ == "__main__":
     logger.info("number of clients: {}, len trial user name: {}".format(n_clients, len(TRIAL_USER_NAME)))
 
     for cr in range(communication_rounds):
+        print("communication round: {}".format(cr))
         logger.info("Start to work on communication round-{}".format(cr))
 
         """with open("lstm_matching_assignments", "rb") as assignment_file:
@@ -121,20 +122,8 @@ if __name__ == "__main__":
             global_test_label += test_data["user_data"][client_user_name]['y']
         global_eval_batch_size = 10
 
-        global_correct_prediction = 0
-        total_val_loss = 0.0
-        global_matched_model.to(device)
-        criterion = nn.CrossEntropyLoss()
-        global_matched_model.eval()
-        with torch.no_grad():
-            for i in range(int(global_num_samples_test / global_eval_batch_size)):
-                input_data, target_data = process_x(global_test_data[global_eval_batch_size*i:global_eval_batch_size*(i+1)]), process_y(global_test_label[global_eval_batch_size*i:global_eval_batch_size*(i+1)])
-                data, targets = torch.from_numpy(input_data).to(device), torch.from_numpy(target_data).to(device)
-                output = global_matched_model(data)[-1].T
-                loss = criterion(output.t(), torch.max(targets, 1)[1])
-                _, pred_label = torch.max(output.t(), 1)
-                global_correct_prediction += (pred_label == torch.max(targets, 1)[1]).sum().item()
-                total_val_loss += loss.item()
+        total_val_loss, global_correct_prediction, global_matched_model = transformer.train_shakespeare(global_num_samples_test, global_eval_batch_size, global_test_data, global_test_label, device, global_matched_model)
+
         logger.info('*' * 89)
         logger.info('| Matched model on Global Testset | valid loss {:5.2f} | pred: {}/{} | acc: {:.4f}%'.format(total_val_loss, global_correct_prediction, global_num_samples_test, global_correct_prediction/global_num_samples_test*100.0))
         logger.info('*' * 89)
@@ -186,23 +175,26 @@ if __name__ == "__main__":
                     # TODO: make sure you re-enable grad when needed.
                     model.state_dict()['encoder.weight'].requires_grad = False
 
-            for model in models:
-                transformer.train(model, train_data, device, epochs=1, lr=lr)
+            for client_index in range(n_clients):
+                eval_batch_size = 10
+                client_user_name = TRIAL_USER_NAME[client_index]
+                num_samples_train = len(train_data["user_data"][client_user_name]['x'])
+                num_samples_test = len(test_data["user_data"][client_user_name]['x'])
 
-        global_matched_model = merge.average_model(models[0], models[1])
-        global_matched_model.to(device)
-        global_matched_model.eval()
-        with torch.no_grad():
-            for i in range(int(global_num_samples_test / global_eval_batch_size)):
-                input_data, target_data = process_x(
-                    global_test_data[global_eval_batch_size * i:global_eval_batch_size * (i + 1)]), process_y(
-                    global_test_label[global_eval_batch_size * i:global_eval_batch_size * (i + 1)])
-                data, targets = torch.from_numpy(input_data).to(device), torch.from_numpy(target_data).to(device)
-                output = global_matched_model(data)[-1].T
-                loss = criterion(output.t(), torch.max(targets, 1)[1])
-                _, pred_label = torch.max(output.t(), 1)
-                global_correct_prediction += (pred_label == torch.max(targets, 1)[1]).sum().item()
-                total_val_loss += loss.item()
+                user_train_data = train_data["user_data"][client_user_name]
+                user_test_data = test_data["user_data"][client_user_name]
+
+                model = models[client_index]
+                total_val_loss, global_correct_prediction, model = transformer.train_shakespeare(num_samples_test,
+                                                                                          eval_batch_size,
+                                                                                          user_test_data['x'],
+                                                                                          user_test_data['y'],
+                                                                                          device,
+                                                                                          model)
+
+        total_val_loss, global_correct_prediction, global_matched_model = transformer.train_shakespeare(global_num_samples_test, global_eval_batch_size, global_test_data,
+                                      global_test_label, device, global_matched_model)
+
         logger.info('*' * 89)
         logger.info('| Matched model on Global Testset | valid loss {:5.2f} | pred: {}/{} | acc: {:.4f}%'.format(total_val_loss, global_correct_prediction, global_num_samples_test, global_correct_prediction/global_num_samples_test*100.0))
         logger.info('*' * 89)

@@ -5,7 +5,9 @@ import time
 import torchtext
 import typing
 import numpy as np
+import torch.nn as nn
 
+from original_fedma.language_modeling import language_utils
 
 class TransformerModel(torch.nn.Module):
 
@@ -194,5 +196,27 @@ def train(model: torch.nn.Module, train_data, device, name: str = "1", epochs: i
         train_epoch(model, ntokens, epoch, criterion, optimizer, scheduler, train_data, bptt, device)
         scheduler.step()
     torch.save(model, f'model_{name}.pt')
-
     return model
+
+
+def train_shakespeare(num_samples, batch_size, data_seq, data_labels, device, model, evaluation=True):
+    # TODO: maybe don't want to reset this.
+    global_correct_prediction = 0
+    total_val_loss = 0.0
+    model.to(device)
+    criterion = nn.CrossEntropyLoss()
+    if eval:
+        model.eval()
+    with torch.no_grad():
+        for i in range(int(num_samples / batch_size)):
+            input_data, target_data = language_utils.process_x(
+                data_seq[batch_size * i:batch_size * (i + 1)]), language_utils.process_y(
+                data_labels[batch_size * i:batch_size * (i + 1)])
+            data, targets = torch.from_numpy(input_data).to(device), torch.from_numpy(target_data).to(device)
+            output = model(data)[-1].T
+            loss = criterion(output.t(), torch.max(targets, 1)[1])
+            _, pred_label = torch.max(output.t(), 1)
+            global_correct_prediction += (pred_label == torch.max(targets, 1)[1]).sum().item()
+            total_val_loss += loss.item()
+    return total_val_loss, global_correct_prediction, model
+
