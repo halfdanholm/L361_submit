@@ -52,7 +52,7 @@ NUM_LAYERS=3 # 2-layer LSTM (4 layers: encoder|hidden LSTM1|hidden LSTM2|decoder
 
 
 if __name__ == "__main__":
-    device = "mps" # torch.device("cuda:0" if torch.cuda.is_available() else "mps" if torch.has_mps else "cpu")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "mps" if torch.has_mps else "cpu")
     logger.info("Experiment running on device: {}".format(device))
 
     with open(TRAIN_DATA_DIR+TRAIN_DATA_NAME) as json_file:
