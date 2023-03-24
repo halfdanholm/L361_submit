@@ -1,8 +1,11 @@
 # part of the code blocks are modified from: https://github.com/litian96/FedProx/blob/master/flearn/models/shakespeare/stacked_lstm.py
 # credit goes to: Tian Li (litian96 @ GitHub)
-
+import itertools
 import json
 import logging
+import random
+from random import shuffle
+
 import numpy as np
 import time
 import math
@@ -49,7 +52,7 @@ NUM_LAYERS=3 # 2-layer LSTM (4 layers: encoder|hidden LSTM1|hidden LSTM2|decoder
 
 
 if __name__ == "__main__":
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "mps" if torch.has_mps else "cpu")
+    device = "mps" # torch.device("cuda:0" if torch.cuda.is_available() else "mps" if torch.has_mps else "cpu")
     logger.info("Experiment running on device: {}".format(device))
 
     with open(TRAIN_DATA_DIR+TRAIN_DATA_NAME) as json_file:
@@ -91,6 +94,7 @@ if __name__ == "__main__":
         with open("matched_global_weights", "rb") as matched_weight_file:
             global_matched_model = pickle.load(matched_weight_file)"""
 
+
         # we will need to construct a new global test set based on all test data on each of the clients
         global_test_data = []
         global_test_label = []
@@ -112,21 +116,10 @@ if __name__ == "__main__":
         ##########################################
         # stage of reconstruct each local model
         ##########################################
-        models = []
-        for client_index in range(n_clients):
-            weights_global = global_matched_model.state_dict()
-            model = transformer.get_model(ntokens, emsize, nhead, d_hid, nlayers, dropout)
-            model.load_state_dict(weights_global)
-            models.append(model)
 
         ###############################################
         # local retraining process
         ###############################################
-        # TODO: is that local retraining process only retraining after a certain layer? Or is this fine because it is at the beginning of the communication round?
-        # TODO: regular training
-        for model in models:
-            model.to(device)
-            model.train()
         #exit()
 
         #######################################################
@@ -164,39 +157,25 @@ if __name__ == "__main__":
             ]
         ]
 
-        for i in range(len(order_of_layers)):
-            print("layer: {}".format(i))
-            # Let's do two clients to begin with
-            model_permuted_full = merge.permute_model(device, models[0], models[1])
-
-            # TODO: do I have to worry about the norm and positional encoder?
-
-            for weights_id in order_of_layers[i]:
-                weights_permuted_full = model_permuted_full.state_dict()
-                weights_layer = weights_permuted_full[weights_id]
-                weights_model = models[1].state_dict()
-                weights_model[weights_id] = weights_layer
-                models[1].load_state_dict(weights_model)
-                for model in models:
-                    # TODO: make sure you re-enable grad when needed.
-                    model.state_dict()[weights_id].requires_grad = False
-
+        for layer in range(len(order_of_layers)):
+            print("layer: {}".format(layer))
+            all_users_train_data = {
+                "x": [],
+                "y": []
+            }
+            all_users_num_samples_train = 0
             for client_index in range(n_clients):
                 client_user_name = TRIAL_USER_NAME[client_index]
                 num_samples_train = len(train_data["user_data"][client_user_name]['x'])
                 user_train_data = train_data["user_data"][client_user_name]
+                all_users_train_data["x"].append(user_train_data["x"])
+                all_users_train_data["y"].append(user_train_data["y"])
+                all_users_num_samples_train += num_samples_train
 
-                model = models[client_index]
-                total_loss, model = transformer.train_shakespeare(device, model, logger, num_samples_train, user_train_data, BATCH_SIZE, lr)
+            all_users_train_data["x"] = list(itertools.chain(*zip(all_users_train_data["x"][0], all_users_train_data["x"][1]))) + all_users_train_data["x"][0][len(all_users_train_data["x"][1]):] + all_users_train_data["x"][1][len(all_users_train_data["x"][0]):]
+            all_users_train_data["y"] = list(itertools.chain(*zip(all_users_train_data["y"][0], all_users_train_data["y"][1]))) + all_users_train_data["y"][0][len(all_users_train_data["y"][1]):] + all_users_train_data["y"][1][len(all_users_train_data["y"][0]):]
 
-            average_model = merge.average_model(models[0], models[1])
-            for weights_id in order_of_layers[i]:
-                for model in models:
-                    state_dict = model.state_dict()
-                    state_dict[weights_id] = average_model.state_dict()[weights_id]
-                    model.load_state_dict(state_dict)
-
-        global_matched_model = merge.average_model(models[0], models[1])
+            total_loss, model = transformer.train_shakespeare(device, global_matched_model, logger, all_users_num_samples_train, all_users_train_data, BATCH_SIZE, lr)
 
         total_val_loss, global_correct_prediction, global_matched_model = transformer.eval_shakespeare(global_num_samples_test, global_eval_batch_size, global_test_data,
                                       global_test_label, device, global_matched_model)

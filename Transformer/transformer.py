@@ -199,14 +199,13 @@ def train(model: torch.nn.Module, train_data, device, name: str = "1", epochs: i
     return model
 
 
-def train_shakespeare(num_samples, batch_size, data_seq, data_labels, device, model, evaluation=True):
-    # TODO: maybe don't want to reset this.
+def eval_shakespeare(num_samples, batch_size, data_seq, data_labels, device, model):
+    # TODO: maybe don't want to reset all of these vars
     global_correct_prediction = 0
     total_val_loss = 0.0
     model.to(device)
     criterion = nn.CrossEntropyLoss()
-    if eval:
-        model.eval()
+    model.eval()
     with torch.no_grad():
         for i in range(int(num_samples / batch_size)):
             input_data, target_data = language_utils.process_x(
@@ -219,4 +218,39 @@ def train_shakespeare(num_samples, batch_size, data_seq, data_labels, device, mo
             global_correct_prediction += (pred_label == torch.max(targets, 1)[1]).sum().item()
             total_val_loss += loss.item()
     return total_val_loss, global_correct_prediction, model
+
+
+def train_shakespeare(device, model, logger, num_samples_train, user_train_data, BATCH_SIZE, lr):
+    total_loss = 0.0
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+    criterion = nn.CrossEntropyLoss()
+
+    for epoch in range(5):
+        print("Epoch: {}".format(epoch))
+        model.train()
+        epoch_start_time = time.time()
+        total_loss = 0
+
+        for batch_index in range(int(num_samples_train / BATCH_SIZE)):
+            input_data, target_data = language_utils.process_x(
+                user_train_data['x'][BATCH_SIZE * batch_index:BATCH_SIZE * (batch_index + 1)]), language_utils.process_y(
+                user_train_data['y'][BATCH_SIZE * batch_index:BATCH_SIZE * (batch_index + 1)])
+
+            data, targets = torch.from_numpy(input_data).to(device), torch.from_numpy(target_data).to(device)
+            optimizer.zero_grad()
+
+            output = model(data)[-1].T
+
+            loss = criterion(output.t(), torch.max(targets, 1)[1])
+            loss.backward()
+            optimizer.step()
+            total_loss += loss.item()
+
+
+            cur_loss = total_loss
+            start_time = time.time()
+
+        print('total_loss: ', total_loss)
+
+    return total_loss, model
 
