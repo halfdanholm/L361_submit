@@ -58,7 +58,7 @@ if __name__ == "__main__":
     with open(TEST_DATA_DIR+TEST_DATA_NAME) as json_file:
         test_data = json.load(json_file)
 
-    lr = 0.25
+    lr = 25
     clip = 0.25
     n_clients = 2
     retrain_flag = False
@@ -170,7 +170,7 @@ if __name__ == "__main__":
                 print("test data size: {}".format(num_samples_train))
 
                 model = models[client_index]
-                total_loss, model = transformer.train_shakespeare(device, model, logger, num_samples_train, user_train_data, BATCH_SIZE, lr)
+                total_loss, model = transformer.train_shakespeare(device, model, logger, num_samples_train, user_train_data, BATCH_SIZE)
 
             model_permuted_full = merge.permute_model(device, models[0], models[1])
             global_matched_model = merge.average_model(models[0], model_permuted_full)

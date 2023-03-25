@@ -170,7 +170,7 @@ if __name__ == "__main__":
                 print("test data size: {}".format(num_samples_train))
 
                 model = models[client_index]
-                total_loss, model = transformer.train_shakespeare(device, model, logger, num_samples_train, user_train_data, BATCH_SIZE, lr)
+                total_loss, model = transformer.train_shakespeare(device, model, logger, num_samples_train, user_train_data, BATCH_SIZE)
 
             global_matched_model = merge.average_model(models[0], models[1])
 

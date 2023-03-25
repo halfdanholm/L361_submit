@@ -170,7 +170,7 @@ if __name__ == "__main__":
             all_users_train_data["x"] = list(itertools.chain(*zip(all_users_train_data["x"][0], all_users_train_data["x"][1]))) + all_users_train_data["x"][0][len(all_users_train_data["x"][1]):] + all_users_train_data["x"][1][len(all_users_train_data["x"][0]):]
             all_users_train_data["y"] = list(itertools.chain(*zip(all_users_train_data["y"][0], all_users_train_data["y"][1]))) + all_users_train_data["y"][0][len(all_users_train_data["y"][1]):] + all_users_train_data["y"][1][len(all_users_train_data["y"][0]):]
 
-            total_loss, global_matched_model = transformer.train_shakespeare(device, global_matched_model, logger, all_users_num_samples_train, all_users_train_data, BATCH_SIZE, lr)
+            total_loss, global_matched_model = transformer.train_shakespeare(device, global_matched_model, logger, all_users_num_samples_train, all_users_train_data, BATCH_SIZE)
 
             total_val_loss, global_correct_prediction, _ = transformer.eval_shakespeare(
                 global_num_samples_test, global_eval_batch_size, global_test_data, global_test_label, device,

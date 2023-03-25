@@ -100,7 +100,7 @@ def get_model(
         emsize: int = 200,
         nhead: int = 20,
         d_hid: int = 400,
-        nlayers: int = 10,
+        nlayers: int = 1,
         dropout: float = 0.19,
         context_length: int = 5000
 ) -> TransformerModel:
@@ -227,7 +227,7 @@ def eval_shakespeare(num_samples, batch_size, data_seq, data_labels, device, mod
     return total_val_loss, global_correct_prediction, model
 
 
-def train_shakespeare(device, model, logger, num_samples_train, user_train_data, BATCH_SIZE, lr):
+def train_shakespeare(device, model, logger, num_samples_train, user_train_data, BATCH_SIZE, lr=10):
     total_loss = 0.0
     optimizer = torch.optim.SGD(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
