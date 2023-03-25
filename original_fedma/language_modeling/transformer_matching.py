@@ -64,9 +64,9 @@ if __name__ == "__main__":
     retrain_flag = False
     communication_rounds = 10
 
-    emsize = 20  # embedding dimension
-    d_hid = 50  # dimension of the feedforward network model in nn.TransformerEncoder
-    nlayers = 1  # DON'T CHANGE THIS WITHOUT CHANGING LAYER FREEZES BELOW. Actually good argument for sticking to 1 layer
+    emsize = 10  # embedding dimension
+    d_hid = 6  # dimension of the feedforward network model in nn.TransformerEncoder
+    nlayers = 1  # number of nn.TransformerEncoderLayer in nn.TransformerEncoder
     nhead = 5  # number of heads in nn.MultiheadAttention
     dropout = 0.2  # dropout probability
     ntokens = len(language_utils.ALL_LETTERS)  # size of vocabulary
@@ -171,16 +171,6 @@ if __name__ == "__main__":
 
             # TODO: do I have to worry about the norm and positional encoder?
 
-            for weights_id in order_of_layers[i]:
-                weights_permuted_full = model_permuted_full.state_dict()
-                weights_layer = weights_permuted_full[weights_id]
-                weights_model = models[1].state_dict()
-                weights_model[weights_id] = weights_layer
-                models[1].load_state_dict(weights_model)
-                for model in models:
-                    # TODO: make sure you re-enable grad when needed.
-                    model.state_dict()[weights_id].requires_grad = False
-
             for client_index in range(n_clients):
                 client_user_name = TRIAL_USER_NAME[client_index]
                 num_samples_train = len(train_data["user_data"][client_user_name]['x'])
@@ -189,14 +179,7 @@ if __name__ == "__main__":
                 model = models[client_index]
                 total_loss, model = transformer.train_shakespeare(device, model, logger, num_samples_train, user_train_data, BATCH_SIZE, lr)
 
-            average_model = merge.average_model(models[0], models[1])
-            for weights_id in order_of_layers[i]:
-                for model in models:
-                    state_dict = model.state_dict()
-                    state_dict[weights_id] = average_model.state_dict()[weights_id]
-                    model.load_state_dict(state_dict)
-
-        global_matched_model = merge.average_model(models[0], models[1])
+            global_matched_model = merge.average_model(models[0], models[1])
 
         total_val_loss, global_correct_prediction, global_matched_model = transformer.eval_shakespeare(global_num_samples_test, global_eval_batch_size, global_test_data,
                                       global_test_label, device, global_matched_model)
