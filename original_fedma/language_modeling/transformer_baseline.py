@@ -172,6 +172,7 @@ if __name__ == "__main__":
                 all_users_train_data["x"].append(user_train_data["x"])
                 all_users_train_data["y"].append(user_train_data["y"])
                 all_users_num_samples_train += num_samples_train
+                print("test data size: {}".format(num_samples_train))
 
             all_users_train_data["x"] = list(itertools.chain(*zip(all_users_train_data["x"][0], all_users_train_data["x"][1]))) + all_users_train_data["x"][0][len(all_users_train_data["x"][1]):] + all_users_train_data["x"][1][len(all_users_train_data["x"][0]):]
             all_users_train_data["y"] = list(itertools.chain(*zip(all_users_train_data["y"][0], all_users_train_data["y"][1]))) + all_users_train_data["y"][0][len(all_users_train_data["y"][1]):] + all_users_train_data["y"][1][len(all_users_train_data["y"][0]):]
