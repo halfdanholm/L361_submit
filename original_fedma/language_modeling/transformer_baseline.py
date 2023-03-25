@@ -67,10 +67,10 @@ if __name__ == "__main__":
     retrain_flag = False
     communication_rounds = 10
 
-    emsize = 50  # embedding dimension
-    d_hid = 150  # dimension of the feedforward network model in nn.TransformerEncoder
-    nlayers = 10  # number of nn.TransformerEncoderLayer in nn.TransformerEncoder
-    nhead = 10 # number of heads in nn.MultiheadAttention
+    emsize = 25  # embedding dimension
+    d_hid = 50  # dimension of the feedforward network model in nn.TransformerEncoder
+    nlayers = 1  # number of nn.TransformerEncoderLayer in nn.TransformerEncoder
+    nhead = 5 # number of heads in nn.MultiheadAttention
     dropout = 0.2  # dropout probability
     ntokens = len(language_utils.ALL_LETTERS)  # size of vocabulary
 
