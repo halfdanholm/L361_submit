@@ -179,13 +179,13 @@ if __name__ == "__main__":
 
             total_loss, global_matched_model = transformer.train_shakespeare(device, global_matched_model, logger, all_users_num_samples_train, all_users_train_data, BATCH_SIZE, lr)
 
-        total_val_loss, global_correct_prediction, _ = transformer.eval_shakespeare(
-            global_num_samples_test, global_eval_batch_size, global_test_data, global_test_label, device,
-            global_matched_model)
+            total_val_loss, global_correct_prediction, _ = transformer.eval_shakespeare(
+                global_num_samples_test, global_eval_batch_size, global_test_data, global_test_label, device,
+                global_matched_model)
 
-        logger.info('| Matched model on Global Testset | valid loss {:5.2f} | pred: {}/{} | acc: {:.4f}%'.format(
-            total_val_loss, global_correct_prediction, global_num_samples_test,
-            global_correct_prediction / global_num_samples_test * 100.0))
+            logger.info('| Matched model on Global Testset | valid loss {:5.2f} | pred: {}/{} | acc: {:.4f}%'.format(
+                total_val_loss, global_correct_prediction, global_num_samples_test,
+                global_correct_prediction / global_num_samples_test * 100.0))
 
         total_val_loss, global_correct_prediction, global_matched_model = transformer.eval_shakespeare(global_num_samples_test, global_eval_batch_size, global_test_data,
                                       global_test_label, device, global_matched_model)
