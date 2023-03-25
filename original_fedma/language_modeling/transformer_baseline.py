@@ -67,13 +67,6 @@ if __name__ == "__main__":
     retrain_flag = False
     communication_rounds = 10
 
-    emsize = 50  # embedding dimension
-    d_hid = 100  # dimension of the feedforward network model in nn.TransformerEncoder
-    nlayers = 1  # number of nn.TransformerEncoderLayer in nn.TransformerEncoder
-    nhead = 10  # number of heads in nn.MultiheadAttention
-    dropout = 0.2  # dropout probability
-    ntokens = len(language_utils.ALL_LETTERS)  # size of vocabulary
-
     TRIAL_USER_NAME = train_data["users"][0:n_clients]  # this can be of length in range from 1 to 132
     start_time = time.time()
     total_loss = 0.0
@@ -81,7 +74,7 @@ if __name__ == "__main__":
     logger.info("Learning rate: {}".format(lr))
     logger.info("number of clients: {}, len trial user name: {}".format(n_clients, len(TRIAL_USER_NAME)))
 
-    global_matched_model = transformer.get_model(ntokens, emsize, nhead, d_hid, nlayers, dropout)
+    global_matched_model = transformer.get_model()
 
     for cr in range(communication_rounds):
         print("communication round: {}".format(cr))

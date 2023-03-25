@@ -95,10 +95,17 @@ class PositionalEncoding(torch.nn.Module):
         return self.dropout(x)
 
 
-
-
-
-def get_model(ntokens: int, emsize: int, nhead: int, d_hid: int, nlayers: int, dropout: float, context_length: int = 5000) -> TransformerModel:
+def get_model(
+        ntokens: int = -1,
+        emsize: int = 200,
+        nhead: int = 20,
+        d_hid: int = 400,
+        nlayers: int = 1,
+        dropout: float = 0.2,
+        context_length: int = 5000
+) -> TransformerModel:
+    if ntokens == -1:
+        ntokens = len(language_utils.ALL_LETTERS)
     return TransformerModel(ntokens, emsize, nhead, d_hid, nlayers, dropout, context_length)
 
 
