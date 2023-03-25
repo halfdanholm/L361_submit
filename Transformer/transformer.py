@@ -227,7 +227,7 @@ def eval_shakespeare(num_samples, batch_size, data_seq, data_labels, device, mod
     return total_val_loss, global_correct_prediction, model
 
 
-def train_shakespeare(device, model, logger, num_samples_train, user_train_data, BATCH_SIZE, lr=0.75):
+def train_shakespeare(device, model, logger, num_samples_train, user_train_data, BATCH_SIZE, lr=0.3):
     total_loss = 0.0
     optimizer = torch.optim.SGD(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
