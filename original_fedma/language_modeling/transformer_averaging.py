@@ -179,8 +179,7 @@ if __name__ == "__main__":
                 model = models[client_index]
                 total_loss, model = transformer.train_shakespeare(device, model, logger, num_samples_train, user_train_data, BATCH_SIZE, lr)
 
-            model_permuted_full = merge.permute_model(device, models[0], models[1])
-            global_matched_model = merge.average_model(models[0], model_permuted_full)
+            global_matched_model = merge.average_model(models[0], models[1])
 
             total_val_loss, global_correct_prediction, _ = transformer.eval_shakespeare(
                 global_num_samples_test, global_eval_batch_size, global_test_data, global_test_label, device,

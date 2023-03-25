@@ -225,7 +225,7 @@ def train_shakespeare(device, model, logger, num_samples_train, user_train_data,
     optimizer = torch.optim.SGD(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
 
-    for epoch in range(5):
+    for epoch in range(1):
         print("Epoch: {}".format(epoch))
         model.train()
         epoch_start_time = time.time()
