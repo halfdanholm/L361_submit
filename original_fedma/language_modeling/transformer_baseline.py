@@ -39,8 +39,8 @@ TRAIN_DATA_DIR = "./datum/shakespeare/data/train/"
 TEST_DATA_DIR = "./datum/shakespeare/data/test/"
 
 # all_data_niid_0_keep_10000_train_9.json
-TRAIN_DATA_NAME = "all_data_niid_0_keep_9_train_9.json"
-TEST_DATA_NAME = "all_data_niid_0_keep_9_test_9.json"
+TRAIN_DATA_NAME = "all_data_niid_0_keep_10000_train_9.json"
+TEST_DATA_NAME = "all_data_niid_0_keep_10000_test_9.json"
 
 TRIAL_EPOCH=10
 
@@ -68,8 +68,8 @@ if __name__ == "__main__":
     communication_rounds = 10
 
     emsize = 50  # embedding dimension
-    d_hid = 100  # dimension of the feedforward network model in nn.TransformerEncoder
-    nlayers = 5  # number of nn.TransformerEncoderLayer in nn.TransformerEncoder
+    d_hid = 150  # dimension of the feedforward network model in nn.TransformerEncoder
+    nlayers = 10  # number of nn.TransformerEncoderLayer in nn.TransformerEncoder
     nhead = 10 # number of heads in nn.MultiheadAttention
     dropout = 0.2  # dropout probability
     ntokens = len(language_utils.ALL_LETTERS)  # size of vocabulary
@@ -105,6 +105,7 @@ if __name__ == "__main__":
             global_test_data += test_data["user_data"][client_user_name]['x']
             global_test_label += test_data["user_data"][client_user_name]['y']
         global_eval_batch_size = 10
+        print("global test data size: {}".format(global_num_samples_test))
 
         total_val_loss, global_correct_prediction, global_matched_model = transformer.eval_shakespeare(global_num_samples_test, global_eval_batch_size, global_test_data, global_test_label, device, global_matched_model)
 
