@@ -101,7 +101,7 @@ def get_model(
         nhead: int = 20,
         d_hid: int = 400,
         nlayers: int = 1,
-        dropout: float = 0.2,
+        dropout: float = 0.19,
         context_length: int = 5000
 ) -> TransformerModel:
     if ntokens == -1:
