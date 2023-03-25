@@ -175,6 +175,7 @@ if __name__ == "__main__":
                 client_user_name = TRIAL_USER_NAME[client_index]
                 num_samples_train = len(train_data["user_data"][client_user_name]['x'])
                 user_train_data = train_data["user_data"][client_user_name]
+                print("test data size: {}".format(num_samples_train))
 
                 model = models[client_index]
                 total_loss, model = transformer.train_shakespeare(device, model, logger, num_samples_train, user_train_data, BATCH_SIZE, lr)
