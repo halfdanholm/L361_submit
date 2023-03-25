@@ -197,7 +197,7 @@ if __name__ == "__main__":
                     state_dict[weights_id] = average_model.state_dict()[weights_id]
                     model.load_state_dict(state_dict)
 
-            total_val_loss, global_correct_prediction, global_matched_model = transformer.eval_shakespeare(
+            total_val_loss, global_correct_prediction, _ = transformer.eval_shakespeare(
                 global_num_samples_test, global_eval_batch_size, global_test_data, global_test_label, device,
                 global_matched_model)
 
