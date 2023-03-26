@@ -97,10 +97,10 @@ class PositionalEncoding(torch.nn.Module):
 
 def get_model(
         ntokens: int = -1,
-        emsize: int = 20,
-        nhead: int = 5,
-        d_hid: int = 50,
-        nlayers: int = 3,
+        emsize: int = 16,
+        nhead: int = 4,
+        d_hid: int = 20,
+        nlayers: int = 2,
         dropout: float = 0.2,
         context_length: int = 500
 ) -> TransformerModel:
@@ -232,7 +232,7 @@ def train_shakespeare(device, model, logger, num_samples_train, user_train_data,
     optimizer = torch.optim.SGD(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
 
-    for epoch in range(3):
+    for epoch in range(2):
         print("Epoch: {}".format(epoch))
         model.train()
         epoch_start_time = time.time()
