@@ -100,7 +100,7 @@ def get_model(
         emsize: int = 16,
         nhead: int = 4,
         d_hid: int = 20,
-        nlayers: int = 2,
+        nlayers: int = 1,
         dropout: float = 0.2,
         context_length: int = 500
 ) -> TransformerModel:

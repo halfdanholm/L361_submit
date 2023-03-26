@@ -65,7 +65,7 @@ if __name__ == "__main__":
     clip = 0.25
     n_clients = 2
     retrain_flag = False
-    communication_rounds = 5
+    communication_rounds = 4
 
     TRIAL_USER_NAME = train_data["users"][0:n_clients]  # this can be of length in range from 1 to 132
     start_time = time.time()
