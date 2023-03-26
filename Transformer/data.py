@@ -5,85 +5,6 @@ import time
 import torchtext
 import typing
 import numpy as np
-from torch.utils.data import DataLoader
-from torch.utils.data.dataset import random_split
-from torch.nn.utils.rnn import pad_sequence
-import torchtext
-from torchtext.data.functional import to_map_style_dataset
-from torchtext.data.utils import get_tokenizer
-from torchtext.vocab import build_vocab_from_iterator
-
-
-def get_classification_set(device, hetero_split=False, batch_size=20):
-    # from: https://github.com/dbetm/my-ai-history/blob/1036aae55a11ed7bf691a2f15a65eefe1b0a077a/courses/Coursera/Intro%20to%20ML%20-%20Duke%20University/NLP/agnews.py
-
-    train_iter, test_iter = torchtext.datasets.AG_NEWS(
-        split=('train', 'test')
-    )
-
-    tokenizer = get_tokenizer(tokenizer='basic_english', language='en')
-
-    def yield_tokens(data_iter):
-        for label, text in data_iter:
-            yield tokenizer(text)
-
-    # The vocabulary block converts a list of tokens into integers.
-    vocab = build_vocab_from_iterator(yield_tokens(train_iter), specials=['<unk>'])
-    # unk = unknown (default)
-    vocab.set_default_index(vocab['<unk>'])
-
-    # example_words = ['cat', 'dog', 'chicken']
-    # print(example_words, vocab(example_words))
-
-    # Create data loaders
-    text_pipeline = lambda x: vocab(tokenizer(x))
-    label_pipeline = lambda x: int(x) - 1
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.has_mps else 'cpu')
-
-    def collate_batch(batch):
-        labels = torch.tensor([label_pipeline(example[0]) for example in batch])
-        sentences = [torch.tensor(text_pipeline(example[1])) for example in batch]
-        data = pad_sequence(sentences).clone().detach()
-
-        return [data, labels]
-
-    train_iter, test_iter = torchtext.datasets.AG_NEWS(
-        split=('train', 'test')
-    )
-
-    train_dataset = to_map_style_dataset(train_iter)
-    test_dataset = to_map_style_dataset(test_iter)
-
-    BATCH_SIZE = 128
-
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=BATCH_SIZE,
-        shuffle=True,
-        collate_fn=collate_batch
-    )
-
-    test_loader = DataLoader(
-        test_dataset,
-        batch_size=BATCH_SIZE,
-        shuffle=False,
-        collate_fn=collate_batch
-    )
-
-    train_iter, test_iter = torchtext.datasets.AG_NEWS(
-        split=('train', 'test')
-    )
-
-    train_data = data_process(train_iter, vocab, tokenizer)
-    test_data = data_process(test_iter, vocab, tokenizer)
-
-    train_data[0].to(device)
-    train_data[1].to(device)
-    test_data[0].to(device)
-    test_data[1].to(device)
-
-    return train_data, test_data
 
 
 def get_dataset_split(device, type='wiki', hetero_split=False, batch_size=20):
@@ -172,24 +93,16 @@ def get_original_dataset_split(device):
 
 def data_process(raw_text_iter: torch.utils.data.dataset.IterableDataset, vocab, tokenizer) -> torch.Tensor:
     """Converts raw text into a flat Tensor."""
-    data = [(label, torch.tensor(vocab(tokenizer(item)), dtype=torch.long)) for label, item in raw_text_iter]
-    data_short = [(label, item) for label, item in data if (35 > item.numel() > 0)]
-    items_short = [item for _, item in data_short]
-    labels_short = [label for label, _ in data_short]
-    data_pad = [torch.nn.functional.pad(item, (0, 35 - item.numel()), 'constant', 0) for item in items_short]
-    data_pad_tensor = torch.stack(data_pad, dim=0)
-    label_tensor = torch.tensor(labels_short, dtype=torch.long)
-    return data_pad_tensor, label_tensor
+    data = [torch.tensor(vocab(tokenizer(item)), dtype=torch.long) for item in raw_text_iter]
+    return torch.cat(tuple(filter(lambda t: t.numel() > 0, data)))
 
 
 def batchify(data: torch.Tensor, bsz: int, device) -> torch.Tensor:
     """Divides the data into bsz separate sequences, removing extra elements
     that wouldn't cleanly fit.
-
     Args:
         data: Tensor, shape [N]
         bsz: int, batch size
-
     Returns:
         Tensor of shape [N // bsz, bsz]
     """

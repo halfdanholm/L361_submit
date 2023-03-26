@@ -8,9 +8,9 @@ import data
 
 
 def main():
-    emsize = 10  # embedding dimension
-    d_hid = 6  # dimension of the feedforward network model in nn.TransformerEncoder
-    nlayers = 1  # number of nn.TransformerEncoderLayer in nn.TransformerEncoder
+    emsize = 20  # embedding dimension
+    d_hid = 30  # dimension of the feedforward network model in nn.TransformerEncoder
+    nlayers = 3  # number of nn.TransformerEncoderLayer in nn.TransformerEncoder
     nhead = 5  # number of heads in nn.MultiheadAttention
     dropout = 0.2  # dropout probability
     ntokens = 28782  # size of vocabulary
@@ -29,7 +29,7 @@ def main():
     #data_1_orig, data_2_orig, val_data_orig, _ = data.get_original_dataset_split(device)
     data_1, data_2, val_data, _ = data.get_dataset_split(device, type=args.data_type, batch_size=args.batch_size)
     #val_data = val_data[:5, :1]
-    data_c_1, data_c_val = data.get_classification_set(device, hetero_split=False, batch_size=args.batch_size)
+    #data_c_1, data_c_val = data.get_classification_set(device, hetero_split=False, batch_size=args.batch_size)
 
     if args.checkpoints_folder != 'skip':
         print('Loading checkpoints...')
@@ -51,7 +51,7 @@ def main():
     print(model_1_trained)
     print('Got models')
 
-    model_permuted = merge.permute_model(device, model_1_trained, model_2_trained, random_permuation=args.random_permutation)
+    model_permuted = merge.permute_model(device, model_1_trained, model_2_trained)
     model_permuted.to(device)
 
     model_merged = merge.average_model(model_1_trained, model_permuted)

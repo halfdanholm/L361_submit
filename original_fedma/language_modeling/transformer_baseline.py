@@ -65,7 +65,7 @@ if __name__ == "__main__":
     clip = 0.25
     n_clients = 2
     retrain_flag = False
-    communication_rounds = 10
+    communication_rounds = 5
 
     TRIAL_USER_NAME = train_data["users"][0:n_clients]  # this can be of length in range from 1 to 132
     start_time = time.time()
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         global_eval_batch_size = 10
         print("global test data size: {}".format(global_num_samples_test))
 
-        total_val_loss, global_correct_prediction, global_matched_model = transformer.eval_shakespeare(global_num_samples_test, global_eval_batch_size, global_test_data, global_test_label, device, global_matched_model)
+        total_val_loss, global_correct_prediction, _ = transformer.eval_shakespeare(global_num_samples_test, global_eval_batch_size, global_test_data, global_test_label, device, global_matched_model)
 
         logger.info('*' * 89)
         logger.info('| Matched model on Global Testset | valid loss {:5.2f} | pred: {}/{} | acc: {:.4f}%'.format(total_val_loss, global_correct_prediction, global_num_samples_test, global_correct_prediction/global_num_samples_test*100.0))
