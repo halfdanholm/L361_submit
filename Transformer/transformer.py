@@ -191,7 +191,7 @@ def get_device():
     return 'cpu' #torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.has_mps else 'cpu')
 
 
-def train(model: torch.nn.Module, train_data, device, name: str = "1", epochs: int = 1, ntokens: int = 28782, lr: int = 5.0) -> torch.nn.Module:
+def train(model: torch.nn.Module, train_data, device, name: str = "1", epochs: int = 1, ntokens: int = 28782, lr: int = 1.6) -> torch.nn.Module:
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=lr)
     gamma = (0.03 / lr) ** (1 / epochs)
