@@ -1,0 +1,2 @@
+This repository is an extension of the L46 repository (https://github.com/halfdanholm/L46)
+The best way to see what work was done here and what was done in L46 is to diff these two repositories. In addition the original_fedma/language_modelling folder has 4 new files that were written by me, based on the lstm_fedma_with_comm.py file.
